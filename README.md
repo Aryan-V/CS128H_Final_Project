@@ -16,4 +16,4 @@ News article sentiment analyzer that allows a user to sort from a given set of a
 - Finding a labelled dataset with a comprehensive set of emotions
 - Implementing an unsupervised model that updates with usage
 ## References
-N/A
+- https://towardsdatascience.com/multi-class-sentiment-analysis-using-bert-86657a2af156
