@@ -4,7 +4,7 @@
 ARE
 
 ## Group member names and NetIDs:
-Aryan Vaswani (aryangv2), Rohan Bokaria (bokaria2), Edwin Ing (edwiningj)
+Aryan Vaswani (aryangv2), Rohan Bokaria (bokaria2), Edwin Ing (edwinji2)
 ## Project Introduction:
 News article sentiment analyzer that allows a user to sort from a given set of articles by emotion rather than topic. Based on user preferences from liking an article, the system can make recommendations for other articles.
 ## System Overview
