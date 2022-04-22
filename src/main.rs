@@ -1,8 +1,28 @@
 pub mod lib;
+use fltk::enums::CallbackTrigger;
 use lib::Data;
 use rust_bert::pipelines::zero_shot_classification::ZeroShotClassificationModel;
+use fltk::{app, prelude::*, window::Window};
+use fltk::*;
 
-fn main() {
+
+
+fn main() { 
+    let app = app::App::default();
+
+    let mut wind = Window::new(200, 200, 150, 250, "Hello");
+    
+    let f = frame::Frame::new(0,0,0,50,"Enter article to perform sentiment analysis on");
+
+
+    let input = input::MultilineInput(0,0,50,50, "");
+    
+    // wind.end();
+
+    // wind.show();
+    
+    app.run().unwrap();
+
     let response = lib::retrieve_news_articles();
 
     let data: Data = match response {
@@ -25,6 +45,37 @@ fn main() {
         None,
         128,
     );
+    let output1;
+    for i in output {
+        let frame1 = frame::Frame::new(0,0,0,50, i.text);
+        output1 = input::IntInput(0,0,0,50, i.score);
+    
+    }
+    wind.end();
+    wind.show();
+    
+    input.set_trigger(CallbackTrigger::Changed);
+    output1.set_trigger(CallbackTrigger::Changed);
 
+    let (s, r) = app::channel::<bool>();
+
+    \
+
+    while app.wait().unwrap() {
+        match r.recv() {
+            Some(msg) => {
+
+            }
+            None => (),
+        }
+
+    }
+
+
+
+
+
+    
+    app.run().unwrap();
     print!("{:?}",output);
 }
