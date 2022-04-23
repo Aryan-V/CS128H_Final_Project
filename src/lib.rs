@@ -2,6 +2,7 @@ use dotenv::dotenv;
 use reqwest::header::{HeaderMap, AUTHORIZATION};
 use std::env;
 use serde::Deserialize;
+use chrono::{Utc, Duration, Date};
 
 #[derive(Deserialize, Debug, Default)]
 pub struct Source {
@@ -39,11 +40,31 @@ impl Data {
         }
         article_headlines
     }
+
+    pub fn article_at(&self, idx: usize) -> &Article {
+        return &self.articles[idx];
+    }
+
+    pub fn url_at(&self, idx: usize) -> String {
+        return self.article_at(idx).url.clone();
+    }
 }
 
 //Helper function to retrieve news articles using an API
 #[tokio::main]
 pub async fn retrieve_news_articles() -> Result<Data, Box<dyn std::error::Error>> {
+
+    //Setting up url to get news article from the week
+    let now: Date<Utc> = Utc::now().date();
+    let end: Date<Utc> = now - Duration::days(7);
+    let mut url: String = "https://newsapi.org/v2/everything?q=keyword&sortBy=popularity&language=en".to_owned();
+    url += "&from=";
+    url += &now.format("%Y-%m-%d").to_string();
+    url += "&to=";
+    url += &end.format("%Y-%m-%d").to_string();
+    url += "&en";
+    println!("URL:{:?}", url); 
+
     dotenv().ok();
     //Retrieve API key from .env file
     let api_key = env::var("NEWS_API_KEY")?;
@@ -56,7 +77,7 @@ pub async fn retrieve_news_articles() -> Result<Data, Box<dyn std::error::Error>
     let client = reqwest::Client::new();
     
     let response = client
-        .get("https://newsapi.org/v2/everything?q=keyword")
+        .get(url)
         .headers(header)
         .send()
         .await?;

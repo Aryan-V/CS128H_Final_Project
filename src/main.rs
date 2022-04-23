@@ -16,7 +16,7 @@ fn main() {
 
     let headlines = data.get_headlines();
     let input: Vec<&str> = headlines.iter().map(|s| s.as_ref()).collect();
-    let candidate_labels = &["angry", "anticipation", "happy", "trust", "fear", "surprise", "sad", "disgust"];
+    let candidate_labels = &["angry", "happy", "silly", "fear", "surprise", "sad", "disgust", "suspense", "neutral"];
 
     let sequence_classification_model = ZeroShotClassificationModel::new(Default::default()).unwrap();
     let output = sequence_classification_model.predict(
@@ -26,5 +26,16 @@ fn main() {
         128,
     );
 
-    print!("{:?}",output);
+    // print!("{:?}",output);
+
+    for candidate_label in candidate_labels {
+        println!("{}", candidate_label);
+        for i in 0..output.len() {
+            if &(output[i].text)[..] == *candidate_label && output[i].score > 0.20 {
+                println!("{}", headlines[i]);
+                println!("{}", data.url_at(i));
+            }
+        }
+    }
+
 }
