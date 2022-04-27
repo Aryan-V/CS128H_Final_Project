@@ -56,7 +56,7 @@ pub async fn retrieve_news_articles() -> Result<Data, Box<dyn std::error::Error>
 
     //Setting up url to get news article from the week
     let now: Date<Utc> = Utc::now().date();
-    let end: Date<Utc> = now - Duration::days(7);
+    let end: Date<Utc> = now - Duration::days(1);
     let mut url: String = "https://newsapi.org/v2/everything?q=keyword&sortBy=popularity&language=en".to_owned();
     url += "&from=";
     url += &now.format("%Y-%m-%d").to_string();
