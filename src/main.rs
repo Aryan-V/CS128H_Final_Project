@@ -1,11 +1,9 @@
 pub mod lib;
-use fltk::enums::CallbackTrigger;
 use lib::Data;
 use rust_bert::pipelines::zero_shot_classification::ZeroShotClassificationModel;
 use fltk::{app, prelude::*, window};
 use fltk::*;
-use std::collections::HashMap;
-use std::hash::Hash;
+use fltk::enums::CallbackTrigger;
 
 pub struct HeadlineURLPair {
     headline: String,
@@ -25,25 +23,29 @@ fn create_app() -> fltk::app::App {
         _ => panic!("Did not find data")
     };
 
-    let mut classified_vec: Vec<Vec<HeadlineURLPair>> = classify(data);
+    let classified_vec: Vec<Vec<HeadlineURLPair>> = classify(data);
 
-    let mut frame_dramatic = frame::Frame::new(0,30,50,50,"Dramatic Stories").with_align(enums::Align::Right);
-    /*
-    for vector.at(0), we get dramatic stories in a hashmap
-    iterate through the hashmap for the first three values
-    replace text of frame 
-    */
-    let mut frame_dramatic_link1 = frame::Frame::new(10,50,50,50,"link").with_align(enums::Align::Right);
-    let mut frame_dramatic_link2 = frame::Frame::new(10,70,50,50, "link").with_align(enums::Align::Right);
-    let mut frame_dramatic_link3 = frame::Frame::new(10,90,50,50,"link").with_align(enums::Align::Right);
-    let mut frame_uplifting = frame::Frame::new(0,120,50,50,"Uplifting Stories").with_align(enums::Align::Right);
-    let mut frame_uplifting_link1 = frame::Frame::new(10,140,50,50,"link").with_align(enums::Align::Right);
-    let mut frame_uplifting_link2 = frame::Frame::new(10,160,50,50,"link").with_align(enums::Align::Right);
-    let mut frame_uplifting_link3 = frame::Frame::new(10,180,50,50,"link").with_align(enums::Align::Right);
-    let mut frame_devastating = frame::Frame::new(0,210,50,50,"Devasting Stories").with_align(enums::Align::Right);
-    let mut frame_devastating_link1 = frame::Frame::new(10,230,50,50,"link").with_align(enums::Align::Right);
-    let mut frame_devastating_link2 = frame::Frame::new(10,250,50,50,"link").with_align(enums::Align::Right);
-    let mut frame_devastating_link3 = frame::Frame::new(10,270,50,50,"link").with_align(enums::Align::Right);
+    let frame_dramatic = frame::Frame::new(0,30,50,50,"Dramatic Stories").with_align(enums::Align::Right);
+    let frame_dramatic_link1 = frame::Frame::new(10,50,50,50,"link").with_align(enums::Align::Right);
+    frame_dramatic_link1.with_label(classified_vec[0][0].headline.as_str());
+    let frame_dramatic_link2 = frame::Frame::new(10,70,50,50, "link").with_align(enums::Align::Right);
+    frame_dramatic_link2.with_label(classified_vec[0][1].headline.as_str());
+    let frame_dramatic_link3 = frame::Frame::new(10,90,50,50,"link").with_align(enums::Align::Right);
+    frame_dramatic_link3.with_label(classified_vec[0][2].headline.as_str());
+    let frame_uplifting = frame::Frame::new(0,120,50,50,"Uplifting Stories").with_align(enums::Align::Right);
+    let frame_uplifting_link1 = frame::Frame::new(10,140,50,50,"link").with_align(enums::Align::Right);
+    frame_uplifting_link1.with_label(classified_vec[1][0].headline.as_str());
+    let frame_uplifting_link2 = frame::Frame::new(10,160,50,50,"link").with_align(enums::Align::Right);
+    frame_uplifting_link2.with_label(classified_vec[1][1].headline.as_str());
+    let frame_uplifting_link3 = frame::Frame::new(10,180,50,50,"link").with_align(enums::Align::Right);
+    frame_uplifting_link3.with_label(classified_vec[1][2].headline.as_str());
+    let frame_devastating = frame::Frame::new(0,210,50,50,"Devasting Stories").with_align(enums::Align::Right);
+    let frame_devastating_link1 = frame::Frame::new(10,230,50,50,"link").with_align(enums::Align::Right);
+    frame_devastating_link1.with_label(classified_vec[2][0].headline.as_str());
+    let frame_devastating_link2 = frame::Frame::new(10,250,50,50,"link").with_align(enums::Align::Right);
+    frame_devastating_link2.with_label(classified_vec[2][1].headline.as_str());
+    let frame_devastating_link3 = frame::Frame::new(10,270,50,50,"link").with_align(enums::Align::Right);
+    frame_devastating_link3.with_label(classified_vec[2][2].headline.as_str());
 
     let mut input = input::Input::new(900,150,400,50, "Try it yourself:");
     input.set_label_font(enums::Font::HelveticaBold);
@@ -59,17 +61,13 @@ fn create_app() -> fltk::app::App {
 }
 
 fn classify(newsarticles : Data) -> Vec<Vec<HeadlineURLPair>> {
+    //Retrieve headlines from newsarticles
     let headlines = newsarticles.get_headlines();
-    let mut sections: Vec<Vec<HeadlineURLPair>> = Vec::new();
-
-    // for title in data.get_headlines() {
-    //     print!("{:?}\n",title);
-    // }
-    
 
     let input: Vec<&str> = headlines.iter().map(|s| s.as_ref()).collect();
     let candidate_labels = &["dramatic", "uplifting", "devastating"];
-
+    
+    //Calling zeroshotclassification model on headlines
     let sequence_classification_model = ZeroShotClassificationModel::new(Default::default()).unwrap();
     let output = sequence_classification_model.predict(
         input.as_slice(),
@@ -77,27 +75,30 @@ fn classify(newsarticles : Data) -> Vec<Vec<HeadlineURLPair>> {
         None,
         128,
     );
-    // print!("{:?}",output);
+
+    let mut sections: Vec<Vec<HeadlineURLPair>> = Vec::new();
 
     for candidate_label in candidate_labels {
-        let mut section: Vec<HeadlineURLPair> = Vec::new();
-        println!("{}", candidate_label);
+        let mut sec: Vec<HeadlineURLPair> = Vec::new();
+        let mut score: f64 = 0.90;
 
+        //Push the highest scores first
+        while score >= 0.50 {
         for i in 0..output.len() {
-            if &(output[i].text)[..] == *candidate_label && output[i].score > 0.20 {
-                section.push(HeadlineURLPair{headline: headlines[i].clone(),url: newsarticles.url_at(i)});
-                println!("{}", headlines[i]);
-                println!("{}", newsarticles.url_at(i));
+            if &(output[i].text)[..] == *candidate_label && output[i].score > score && output[i].score <= score + 0.10 {
+                sec.push(HeadlineURLPair{headline: headlines[i].clone(),url: newsarticles.url_at(i)});
             }
         }
-        while section.len() < 3 {
-            section.push(HeadlineURLPair{headline: "".to_string(),url: "".to_string()});
+        score -= 0.10;
         }
-        sections.push(section);
+        
+        //Create empty headlines to guarantee atleast 3
+        while sec.len() < 3 {
+            sec.push(HeadlineURLPair{headline: "".to_string(),url: "".to_string()});
+        }
+        sections.push(sec);
     }
-
     sections
-
 }
 
 fn main() { 
