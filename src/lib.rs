@@ -4,6 +4,7 @@ use std::env;
 use serde::Deserialize;
 use chrono::{Utc, Duration, Date};
 
+//Structs are used in deserialization
 #[derive(Deserialize, Debug, Default)]
 pub struct Source {
     id: Option<String>,
@@ -40,11 +41,11 @@ impl Data {
         }
         article_headlines
     }
-
+    //Returns article at a particular index
     pub fn article_at(&self, idx: usize) -> &Article {
         return &self.articles[idx];
     }
-
+    //Returns url 
     pub fn url_at(&self, idx: usize) -> String {
         return self.article_at(idx).url.clone();
     }
