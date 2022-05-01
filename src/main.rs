@@ -1,5 +1,6 @@
 pub mod lib;
 use lib::Data;
+use rust_bert::pipelines::sequence_classification::Label;
 use rust_bert::pipelines::zero_shot_classification::ZeroShotClassificationModel;
 use fltk::{app, prelude::*, window};
 use fltk::*;
@@ -9,7 +10,10 @@ pub struct HeadlineURLPair {
     headline: String,
     url: String,
 }
-
+//Fix input box
+//Add links to headlines
+//Improve padding and formating
+//Change label 'devastating'
 fn create_app() -> fltk::app::App {
     let app = app::App::default().with_scheme(app::Scheme::Plastic);
     let mut win = window::Window::default().with_size(1400, 1000).center_screen();
@@ -49,15 +53,32 @@ fn create_app() -> fltk::app::App {
 
     let mut input = input::Input::new(900,150,400,50, "Try it yourself:");
     input.set_label_font(enums::Font::HelveticaBold);
-    let mut execbutton = button::Button::new(900,200, 100,50,"Execute");
+    let mut button = button::Button::new(900,200, 100,50,"Execute");
 
-    let mut frame_classification = frame::Frame::new(900, 300, 100,100, "Our Classification: ");
-         
+    let mut frame_classification = frame::Frame::new(900, 300, 200 ,100 , "Our Classification: ");
+    
     win.end();
     win.show();
     frame.show();
+
+    button.set_callback(move |_| {let req= app::handle(enums::Event::Enter, &win);});
+
+    frame_classification.handle(move |f, ev| {
+        if ev == enums::Event::Enter {
+            let output = classify_headline(input.value().as_str());
+            let mut to_display = "Our Classification: \nLabel: ".to_string();
+            to_display += &output.text.to_string();
+            to_display += ", Score: ";
+            to_display += &output.score.to_string();
+            f.set_label(to_display.as_str());
+            println!("{}",to_display);
+            true
+        } else {
+            false
+        }
+    });
+
     app 
-    
 }
 
 fn classify(newsarticles : Data) -> Vec<Vec<HeadlineURLPair>> {
@@ -101,17 +122,21 @@ fn classify(newsarticles : Data) -> Vec<Vec<HeadlineURLPair>> {
     sections
 }
 
-fn main() { 
-    // let labels = ["angry", "happy", "silly", "fear", "surprise", "sad", "disgust", "suspense", "neutral"];
-    // let sections = classify(data);
-
-    // for section in 0..sections.len() {
-    //     println!("{:?}", labels[section]);
-    //     for article in &sections[section]{
-    //         println!("{:?}: {:?}", article.0, article.1);
-    //     }
-    // }
+fn classify_headline(headline: &str) -> Label {
+    let candidate_labels = &["dramatic", "uplifting", "devastating"];
     
+    //Calling zeroshotclassification model on headline
+    let sequence_classification_model = ZeroShotClassificationModel::new(Default::default()).unwrap();
+    let output = sequence_classification_model.predict(
+        [headline],
+        candidate_labels,
+        None,
+        128,
+    );
+    output[0].clone()
+}
+
+fn main() { 
     let app = create_app();
     app.run().unwrap();
 
