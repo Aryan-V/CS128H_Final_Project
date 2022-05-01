@@ -10,8 +10,8 @@ News article sentiment analyzer that allows a user to sort from a given set of a
 ## System Overview
 - API for gathering news articles
 - NLP algorithm on article text to gauge emotion [sentiment analysis]
-- Develop a system for users to like/dislike an article
-- Unsuperivsed model to gather user preferences and offer predictions
+  - Zero-Shot Classification Model
+- Section for users to paste their own headlines and receive feedback from the model
 ## Possible Challenges
 - Finding a labelled dataset with a comprehensive set of emotions
 - Implementing an unsupervised model that updates with usage
