@@ -3,4 +3,4 @@
 2. Clone repository with `git clone https://github.com/Aryan-V/CS128H_Final_Project` on the command line
 3. Enter the directory (`cd CS128H_Final_Project`)
 4. `cargo run`
-5. Wait for the project to run (it may take a while), and it should display a page window
+5. Wait for the project to run (it may take a while), and it should display a page window containing classified headlines
